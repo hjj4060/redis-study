@@ -1,0 +1,34 @@
+services:
+  my-server:
+    build: .
+    ports:
+      - "8088:8088"
+    depends_on: # my-db가 실행이 다 되어야 my-server가 실행이 된다.
+      my-db:
+        condition: service_healthy
+      my-redis:
+        condition: service_healthy
+  my-db:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: pwd1234
+      MYSQL_DATABASE: mydb
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    ports:
+        - "3306:3306"
+    healthcheck: # 헬스 체크 명령어
+        test: ["CMD", "mysqladmin", "ping"]
+        interval: 5s
+        retries: 10
+  my-redis:
+    image: redis
+    command: redis-server --appendonly yes # 데이터를 디스크에 안전하게 저장하기 위한 옵션
+    volumes:
+      - ./redis_data:/data # 레디스 데이터 영구 저장을 위한 볼륨 매핑
+    ports:
+      - "6379:6379"
+    healthcheck: # 레디스 헬스 체크 명령어
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      retries: 10
