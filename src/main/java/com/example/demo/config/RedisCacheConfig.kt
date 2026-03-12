@@ -1,6 +1,8 @@
 package com.example.demo.config
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.springframework.cache.CacheManager
@@ -10,6 +12,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.cache.RedisCacheConfiguration
 import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.data.redis.connection.RedisConnectionFactory
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext
 import org.springframework.data.redis.serializer.StringRedisSerializer
@@ -21,14 +24,21 @@ class RedisCacheConfig {
 
     @Bean
     fun boardCacheManager(redisConnectionFactory: RedisConnectionFactory): CacheManager {
-        // 1. LocalDateTime을 지원하는 ObjectMapper 설정
+        // 1. ObjectMapper 설정 (타입 정보 포함 활성화)
         val objectMapper = ObjectMapper()
-            .registerModule(JavaTimeModule()) // Java 8 날짜/시간 지원
-            .registerKotlinModule() // 코틀린 클래스 지원
+            .registerModule(JavaTimeModule())
+            .registerKotlinModule()
+            .activateDefaultTyping(
+                BasicPolymorphicTypeValidator.builder()
+                    .allowIfBaseType(Any::class.java)
+                    .build(),
+                ObjectMapper.DefaultTyping.NON_FINAL,
+                JsonTypeInfo.As.WRAPPER_ARRAY
+            )
 
-        // 2. 설정된 ObjectMapper를 사용하는 Serializer 생성
-        val serializer = Jackson2JsonRedisSerializer(objectMapper, Any::class.java)
-
+        // 2. GenericJackson2JsonRedisSerializer 사용
+        // 이 Serializer는 객체의 클래스 타입을 JSON에 포함시켜 저장합니다.
+        val serializer = GenericJackson2JsonRedisSerializer(objectMapper)
         val redisCacheConfiguration = RedisCacheConfiguration
             .defaultCacheConfig()
             .serializeKeysWith(
