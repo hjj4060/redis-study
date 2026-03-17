@@ -39,6 +39,8 @@ dependencies {
 
 	implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
 
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+
 //	implementation("org.apache.lucene:lucene-core:9.9.1")
 //	implementation("org.apache.lucene:lucene-analyzers-common:9.9.1")
 //	implementation("org.apache.lucene:lucene-analyzers-nori:9.9.1")
