@@ -1,4 +1,4 @@
-package coroutine_lecture.inaction.section4
+package inaction.section4
 
 // equals() 오버라이딩 할때, hashCode()도 반드시 오버라이딩
 class Client(val name: String, val portalCode: Int) {

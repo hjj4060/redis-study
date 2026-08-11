@@ -1,4 +1,4 @@
-package coroutine_lecture.inaction
+package inaction
 
 import kotlinx.coroutines.*
 import java.time.ZonedDateTime
@@ -18,6 +18,7 @@ fun yieldExample() {
         println("after first launch")
         launch {
             log("2")
+            throw Exception("test exception")
             delay(1000L)
             log("4")
             delay(2000L)
